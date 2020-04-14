@@ -58,12 +58,7 @@ function core_init() {
         xhttp.onreadystatechange = function() {
     
             if (this.readyState == 4 && this.status == 200) {
-                document.getElementById("result").innerHTML =
-                this.responseText;
-    
-                let data = JSON.parse(this.responseText);
-    
-                return data
+                return JSON.parse(this.responseText);
             }
         };
     
@@ -212,7 +207,7 @@ function core_init() {
 
     function getPLNValue(value, bidRate) {
         if (+bidRate > 0) {
-            value.replace(',', '.');
+            value = value.replace(',', '.');
             return +value * bidRate
         }
         return 'n/a'
