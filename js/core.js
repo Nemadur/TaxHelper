@@ -27,7 +27,7 @@ function core_init() {
             let openingDate = (open && typeof open == 'string') ? open : getValidDate($('#openingDate').val(), 'NBP');
             let closingDate = (close && typeof close == 'string') ? close : getValidDate($('#closingDate').val(), 'NBP');
     
-            const URL = 'http://api.nbp.pl/api/exchangerates/rates/c/usd';
+            const URL = 'https://api.nbp.pl/api/exchangerates/rates/c/usd';
         
             if (openingDate && closingDate) {
                 let exchangeUrl = `${URL}/${openingDate}/${closingDate}/`;
