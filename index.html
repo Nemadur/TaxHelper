@@ -43,7 +43,7 @@
                             <div class="field">
                             
                                 <div class="ui form">
-                                    <div class="two fields">
+                                    <div class="three fields">
                                         <div class="field">
                                             <label>Open</label>
                                             <input type="text" id="openingDate" name="datepicker">
@@ -52,9 +52,13 @@
                                             <label>Close</label>
                                             <input type="text" id="closingDate" name="datepicker">
                                         </div>
+                                        <div class="field">
+                                            <label>Currency</label>
+                                            <input type="text" id="currency">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="ui secondary basic segment button" id='listButton'>
+                                <div class="ui secondary basic segment button disabled" id='listButton'>
                                     Show list
                                 </div>
                             
@@ -79,7 +83,7 @@
 
                             <input style="display: none;" type="file" id="fileInput" accept='.csv' />
 
-                            <div class="ui secondary basic segment button" id='processButton'>
+                            <div class="ui secondary basic segment button disabled" id='processButton'>
                                 Process file
                             </div>
 

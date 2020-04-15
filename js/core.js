@@ -16,21 +16,19 @@ function core_init() {
     $('#processButton').on('click', processFile);
 
     var CSVfile = [];
-
-
-    // EXCHANGE LIST BY DATE
     
-    function getExchangeRate(open, close) {
+    function getExchangeRate(open, close, currency = 'usd') {
         
         return new Promise(resolve => {
 
             let openingDate = (open && typeof open == 'string') ? open : getValidDate($('#openingDate').val(), 'NBP');
             let closingDate = (close && typeof close == 'string') ? close : getValidDate($('#closingDate').val(), 'NBP');
-    
-            const URL = 'https://api.nbp.pl/api/exchangerates/rates/c/usd';
+            
+
+            const URL = 'https://api.nbp.pl/api/exchangerates/rates/c/';
         
             if (openingDate && closingDate) {
-                let exchangeUrl = `${URL}/${openingDate}/${closingDate}/`;
+                let exchangeUrl = `${URL}/${currency}/${openingDate}/${closingDate}/`;
         
                 var xhttp = new XMLHttpRequest();
         
@@ -66,8 +64,8 @@ function core_init() {
             var contents = e.target.result;
             $('#fileName').html(name);
 
-            $('#exchangeTable').removeClass('nodisplay');
             displayContents(contents);
+            $('#exchangeTable').removeClass('nodisplay');
         };
         reader.readAsText(file);
     }
@@ -97,6 +95,7 @@ function core_init() {
 
         CSVfile = resultTable;
         renderTable(resultTable);
+        $('#processButton').removeClass('disabled');
     }
     
     function renderTable(data) {
@@ -182,6 +181,7 @@ function core_init() {
             element[4] = getPLNValue(element[4], bidRate);
 
         }
+
 
         renderTable(CSVfile);
     }
