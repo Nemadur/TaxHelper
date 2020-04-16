@@ -1,6 +1,10 @@
-MIT License
+---
+name: License
+about: MIT license
+---
+# MIT License
 
-Copyright (c) 2020 Jan Piękoś
+_Copyright (c) 2020 Jan Piękoś_
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
