@@ -54,12 +54,15 @@
                                         </div>
                                         <div class="field">
                                             <label>Currency</label>
-                                            USD
-                                            <!-- <input type="text" id="currency"> -->
+                                            <select id="currency">
+                                                <option value="usd">USD</option>
+                                                <option value="eur">EURO</option>
+                                                <option value="gbp">GBP</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="ui secondary basic segment button disabled" id='listButton'>
+                                <div class="ui secondary basic segment button" id='listButton'>
                                     Show list
                                 </div>
                             
@@ -84,7 +87,7 @@
 
                             <input style="display: none;" type="file" id="fileInput" accept='.csv' />
 
-                            <div class="ui secondary basic segment button disabled" id='processButton'>
+                            <div class="ui secondary basic segment button" id='processButton'>
                                 Process file
                             </div>
 
@@ -95,6 +98,7 @@
 
 <!-- result tables -->
 
+            <h1 id="tableTitle"></h1>
             <table class="ui single line table nodisplay" id="exchangeTable">
                 <thead id="exchangeTableHead">
 

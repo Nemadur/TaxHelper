@@ -12,38 +12,114 @@ function core_init() {
     
     $('#fileButton').on('click', fileClick);
     $('#fileInput').on('change', readSingleFile);
-    $('#listButton').on('click', getExchangeRate);
+
+    $('#listButton').on('click', getDatesRates);
     $('#processButton').on('click', processFile);
 
     var CSVfile = [];
-    
-    function getExchangeRate(open, close, currency = 'usd') {
-        
-        return new Promise(resolve => {
 
-            let openingDate = (open && typeof open == 'string') ? open : getValidDate($('#openingDate').val(), 'NBP');
-            let closingDate = (close && typeof close == 'string') ? close : getValidDate($('#closingDate').val(), 'NBP');
-            
+    // Source: http://stackoverflow.com/questions/497790
+    var dates = {
+        convert:function(d) {
+            // Converts the date in d to a date-object. The input can be:
+            //   a date object: returned without modification
+            //  an array      : Interpreted as [year,month,day]. NOTE: month is 0-11.
+            //   a number     : Interpreted as number of milliseconds
+            //                  since 1 Jan 1970 (a timestamp) 
+            //   a string     : Any format supported by the javascript engine, like
+            //                  "YYYY/MM/DD", "MM/DD/YYYY", "Jan 31 2009" etc.
+            //  an object     : Interpreted as an object with year, month and date
+            //                  attributes.  **NOTE** month is 0-11.
+            return (
+                d.constructor === Date ? d :
+                d.constructor === Array ? new Date(d[0],d[1],d[2]) :
+                d.constructor === Number ? new Date(d) :
+                d.constructor === String ? new Date(d) :
+                typeof d === "object" ? new Date(d.year,d.month,d.date) :
+                NaN
+            );
+        },
+        compare:function(a,b) {
+            // Compare two dates (could be of any type supported by the convert
+            // function above) and returns:
+            //  -1 : if a < b
+            //   0 : if a = b
+            //   1 : if a > b
+            // NaN : if a or b is an illegal date
+            // NOTE: The code inside isFinite does an assignment (=).
+            return (
+                isFinite(a=this.convert(a).valueOf()) &&
+                isFinite(b=this.convert(b).valueOf()) ?
+                (a>b)-(a<b) :
+                NaN
+            );
+        },
+        inRange:function(d,start,end) {
+            // Checks if date in d is between dates in start and end.
+            // Returns a boolean or NaN:
+            //    true  : if d is between start and end (inclusive)
+            //    false : if d is before start or after end
+            //    NaN   : if one or more of the dates is illegal.
+            // NOTE: The code inside isFinite does an assignment (=).
+        return (
+                isFinite(d=this.convert(d).valueOf()) &&
+                isFinite(start=this.convert(start).valueOf()) &&
+                isFinite(end=this.convert(end).valueOf()) ?
+                start <= d && d <= end :
+                NaN
+            );
+        }
+    }
 
-            const URL = 'https://api.nbp.pl/api/exchangerates/rates/c/';
-        
-            if (openingDate && closingDate) {
-                let exchangeUrl = `${URL}/${currency}/${openingDate}/${closingDate}/`;
-        
-                var xhttp = new XMLHttpRequest();
-        
-                xhttp.onreadystatechange = function() {
+    // DATES
+
+    async function getDatesRates() {
+        let openingDate = getValidDate($('#openingDate').val(), 'NBP');
+        let closingDate = getValidDate($('#closingDate').val(), 'NBP');
+        let currency = $('#currency').val();
+
+        if (!datesValidation(openingDate, closingDate)) {
             
-                    if (this.readyState == 4 && this.status == 200) {
-                        let data = JSON.parse(this.responseText);
-                        resolve(data);
-                    }
-                };
-            
-                xhttp.open("GET", exchangeUrl, true);
-                xhttp.send();
-            }
-        });
+        }
+
+        var exchangeList = await getExchangeRate(openingDate, closingDate, currency);
+
+        $('#tableTitle').html(`Tabela: ${exchangeList.table} - ${exchangeList.currency} [${exchangeList.code}]`);
+        
+        let table = prepareExchangeTable(exchangeList.rates);
+        renderTable(table);
+        $('#exchangeTable').removeClass('nodisplay');
+    }
+
+    function datesValidation(open, close) {
+
+        if (!open || !close) {
+            return false
+        }
+
+        let opening = open.split('-');
+        let openingDate = new Date(opening[0], opening[1], opening[2]);
+
+        let closing = close.split('-');
+        let closingDate = new Date(closing[0], closing[1], closing[2]);
+
+        if (dates.compare(openingDate, closingDate) < 1){
+            return true
+        };
+
+        return false
+    }
+
+    function prepareExchangeTable(params) {
+        
+        let header = Object.keys(params[0]);
+        let data = [];
+
+        for (const key in params) {
+            data.push(Object.values(params[key]))
+        }
+
+        return {header: header, data: data}
     }
 
     // CSV FILE
@@ -94,45 +170,8 @@ function core_init() {
         });
 
         CSVfile = resultTable;
-        renderTable(resultTable);
+        renderTableOld(resultTable);
         $('#processButton').removeClass('disabled');
-    }
-    
-    function renderTable(data) {
-        
-        const tableHead = $('#exchangeTableHead');
-        const tableBody = $('#exchangeTableBody');
-
-        tableHead.empty();
-        tableBody.empty();
-
-        var tableHeadRow = document.createElement('tr');
-        data[0].forEach(element => {
-            var headCell = document.createElement('th');
-            headCell.innerHTML = element;
-
-            tableHeadRow.appendChild(headCell);
-        });
-        
-        tableHead.append(tableHeadRow);
-
-        for (let key in data) {
-            if (key == 0) {
-                continue;
-            }
-
-            const element = data[key];
-            
-            var bodyRow = document.createElement('tr');
-            element.forEach( cell => {
-                var bodyCell = document.createElement('td');
-                bodyCell.innerHTML = cell;
-
-                bodyRow.appendChild(bodyCell);
-            });
-
-            tableBody.append(bodyRow);
-        }
     }
 
     function validLine(line) {
@@ -155,7 +194,7 @@ function core_init() {
     async function processFile() {
         
         let dates = getDates(CSVfile);
-        var exchangeList = await getExchangeRate(dates[0], dates[1]);
+        var exchangeList = await getExchangeRate(dates[0], dates[1], 'usd');
 
         CSVfile[0].splice(3,0,'Kurs');
 
@@ -182,8 +221,7 @@ function core_init() {
 
         }
 
-
-        renderTable(CSVfile);
+        renderTableOld(CSVfile);
     }
 
     function getPLNValue(value, bidRate) {
@@ -238,4 +276,95 @@ function core_init() {
         }
     }
     
+    function getExchangeRate(openingDate, closingDate, currency) {
+        
+        return new Promise(resolve => {
+
+            const URL = 'https://api.nbp.pl/api/exchangerates/rates/c/';
+        
+            if (openingDate && closingDate) {
+                let exchangeUrl = `${URL}/${currency}/${openingDate}/${closingDate}/`;
+        
+                var xhttp = new XMLHttpRequest();
+        
+                xhttp.onreadystatechange = function() {
+            
+                    if (this.readyState == 4 && this.status == 200) {
+                        let data = JSON.parse(this.responseText);
+                        resolve(data);
+                    }
+                };
+            
+                xhttp.open("GET", exchangeUrl, true);
+                xhttp.send();
+            }
+        });
+    }
+
+    function renderTableOld(data) {
+        
+        const tableHead = $('#exchangeTableHead');
+        const tableBody = $('#exchangeTableBody');
+
+        tableHead.empty();
+        tableBody.empty();
+
+        var tableHeadRow = document.createElement('tr');
+        data[0].forEach(element => {
+            var headCell = document.createElement('th');
+            headCell.innerHTML = element;
+
+            tableHeadRow.appendChild(headCell);
+        });
+        
+        tableHead.append(tableHeadRow);
+
+        for (let key in data) {
+            if (key == 0) {
+                continue;
+            }
+
+            const element = data[key];
+            
+            var bodyRow = document.createElement('tr');
+            element.forEach( cell => {
+                var bodyCell = document.createElement('td');
+                bodyCell.innerHTML = cell;
+
+                bodyRow.appendChild(bodyCell);
+            });
+
+            tableBody.append(bodyRow);
+        }
+    }
+
+    function renderTable(table) {
+        
+        const tableHead = $('#exchangeTableHead');
+        const tableBody = $('#exchangeTableBody');
+
+        tableHead.empty();
+        tableBody.empty();
+
+        var tableHeadRow = document.createElement('tr');
+        table.header.forEach(element => {
+            var headCell = document.createElement('th');
+            headCell.innerHTML = element;
+
+            tableHeadRow.appendChild(headCell);
+        });
+        tableHead.append(tableHeadRow);
+
+        table.data.forEach(element => {
+            var bodyRow = document.createElement('tr');
+            element.forEach( cell => {
+                var bodyCell = document.createElement('td');
+                bodyCell.innerHTML = cell;
+
+                bodyRow.appendChild(bodyCell);
+            });
+
+            tableBody.append(bodyRow);
+        });
+    }
 }
