@@ -1,7 +1,3 @@
----
-name: License
-about: MIT license
----
 # MIT License
 
 _Copyright (c) 2020 Jan Piękoś_
