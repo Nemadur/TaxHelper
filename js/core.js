@@ -206,22 +206,57 @@ function core_init() {
 
             let date = getValidDate(element[0], 'NBP');
 
-            let NBPLine = exchangeList.rates.find( e => e.effectiveDate == date);
-            let NBPindex = exchangeList.rates.indexOf(NBPLine);
-            let bidRate = 'n/a';
+            let rates =  getRates(date, exchangeList);
 
-            if (--NBPindex > -1) {
-                const exchangeLine = exchangeList.rates[NBPindex];
-                bidRate = exchangeLine.bid;
-            }
+            // let NBPindex = exchangeList.rates.indexOf(NBPLine);
+            // let bidRate = 'n/a';
 
-            element.splice(3,0,bidRate);
-            element[2] = (NBPindex > -1) ? 'PLN' : element[2];
-            element[4] = getPLNValue(element[4], bidRate);
+            // if (--NBPindex > -1) {
+            //     const exchangeLine = exchangeList.rates[NBPindex];
+            //     bidRate = exchangeLine.bid;
+            // }
+
+            // element.splice(3,0,bidRate);
+            // element[2] = (NBPindex > -1) ? 'PLN' : element[2];
+            // element[4] = getPLNValue(element[4], bidRate);
+            element.splice(3,0,rates[0]);
+            element[2] = (rates[1] > -1) ? 'PLN' : element[2];
+            element[4] = getPLNValue(element[4], rates[0]);
 
         }
 
         renderTableOld(CSVfile);
+    }
+
+    function getRates(date, exchangeList) {
+        let NBPLine = exchangeList.rates.find( e => e.effectiveDate == date);
+        let getPrevious = true
+
+        if (NBPLine == -1) getPrevious = true;
+        
+        while (NBPLine == -1) {
+            date = getPreviousDate(date);
+            NBPLine = exchangeList.rates.find( e => e.effectiveDate == date);
+        }
+
+        let NBPindex = getPrevious ? exchangeList.rates.indexOf(NBPLine-1): exchangeList.rates.indexOf(NBPLine);
+
+        const exchangeLine = exchangeList.rates[NBPindex];
+        let bidRate = exchangeLine.bid;
+
+        return [bidRate, NBPindex];
+    }
+
+    function getPreviousDate(date) {
+        const yesterday = new Date(date);
+
+        yesterday.setDate(yesterday.getDate()-1);
+
+        let newYear = yesterday.getFullYear();
+        let newMonth = yesterday.getMonth()+1;
+        let newDay = yesterday.getDate();
+
+        return getValidDate(`${newDay}.${newMonth}.${newYear}`, 'NBP');
     }
 
     function getPLNValue(value, bidRate) {
