@@ -248,7 +248,7 @@ function core_init() {
         let newMonth = date.getMonth()+1;
         let newDay = date.getDate();
 
-        let newOpening = getValidDate(`${newYear}.${newMonth}.${newDay}`, 'NBP');
+        let newOpening = getValidDate(`${newDay}.${newMonth}.${newYear}`, 'NBP');
 
         // var newOpening = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
 
