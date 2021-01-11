@@ -160,12 +160,11 @@ function core_init() {
             let date = getValidDate(lineData[0], 'show');
             let name = lineData[3];
             let currency = lineData[6];
-            let rate = 'rate'
             let value = lineData[9];
             let transactionId = lineData[12];
 
-            if (validLine([date, name, currency, rate, value, transactionId]) || header) {
-                resultTable.push( [date, name, currency, rate, value, transactionId] )
+            if (validLine([date, name, currency, value, transactionId]) || header) {
+                resultTable.push( [date, name, currency, value, transactionId] )
                 header = false;
             }
         });
