@@ -160,11 +160,12 @@ function core_init() {
             let date = getValidDate(lineData[0], 'show');
             let name = lineData[3];
             let currency = lineData[6];
+            let rate = 'rate'
             let value = lineData[9];
             let transactionId = lineData[12];
 
-            if (validLine([date, name, currency, value, transactionId]) || header) {
-                resultTable.push( [date, name, currency, value, transactionId] )
+            if (validLine([date, name, currency, rate, value, transactionId]) || header) {
+                resultTable.push( [date, name, currency, rate, value, transactionId] )
                 header = false;
             }
         });
@@ -242,7 +243,14 @@ function core_init() {
 
         openig = openig.split('-');
         var date = new Date(openig[0], openig[1] -1, openig[2] -7);
-        var newOpening = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
+
+        let newYear = date.getFullYear();
+        let newMonth = date.getMonth()+1;
+        let newDay = date.getDate();
+
+        let newOpening = getValidDate(`${newYear}.${newMonth}.${newDay}`, 'NBP');
+
+        // var newOpening = `${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}`;
 
         return [newOpening, closing]
     }
@@ -280,7 +288,7 @@ function core_init() {
         
         return new Promise(resolve => {
 
-            const URL = 'https://api.nbp.pl/api/exchangerates/rates/c/';
+            const URL = 'https://api.nbp.pl/api/exchangerates/rates/c';
         
             if (openingDate && closingDate) {
                 let exchangeUrl = `${URL}/${currency}/${openingDate}/${closingDate}/`;
