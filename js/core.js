@@ -232,7 +232,7 @@ function core_init() {
         let NBPLine = exchangeList.rates.find( e => e.effectiveDate == date);
         let getPrevious = true
 
-        if (NBPLine == -1) getPrevious = true;
+        if (NBPLine == -1) getPrevious = false;
         
         while (NBPLine == -1) {
             date = getPreviousDate(date);
