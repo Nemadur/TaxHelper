@@ -239,7 +239,7 @@ function core_init() {
             NBPLine = exchangeList.rates.find( e => e.effectiveDate == date);
         }
 
-        let NBPindex = getPrevious ? exchangeList.rates.indexOf(NBPLine-1): exchangeList.rates.indexOf(NBPLine);
+        let NBPindex = getPrevious ? exchangeList.rates.indexOf(NBPLine) -1: exchangeList.rates.indexOf(NBPLine);
 
         const exchangeLine = exchangeList.rates[NBPindex];
         let bidRate = exchangeLine.bid;
