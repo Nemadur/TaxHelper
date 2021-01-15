@@ -208,17 +208,6 @@ function core_init() {
 
             let rates =  getRates(date, exchangeList);
 
-            // let NBPindex = exchangeList.rates.indexOf(NBPLine);
-            // let bidRate = 'n/a';
-
-            // if (--NBPindex > -1) {
-            //     const exchangeLine = exchangeList.rates[NBPindex];
-            //     bidRate = exchangeLine.bid;
-            // }
-
-            // element.splice(3,0,bidRate);
-            // element[2] = (NBPindex > -1) ? 'PLN' : element[2];
-            // element[4] = getPLNValue(element[4], bidRate);
             element.splice(3,0,rates[0]);
             element[2] = (rates[1] > -1) ? 'PLN' : element[2];
             element[4] = getPLNValue(element[4], rates[0]);
@@ -242,7 +231,7 @@ function core_init() {
         let NBPindex = getPrevious ? exchangeList.rates.indexOf(NBPLine) -1: exchangeList.rates.indexOf(NBPLine);
 
         const exchangeLine = exchangeList.rates[NBPindex];
-        let bidRate = exchangeLine.bid;
+        let bidRate = exchangeLine.mid;
 
         return [bidRate, NBPindex];
     }
@@ -322,7 +311,7 @@ function core_init() {
         
         return new Promise(resolve => {
 
-            const URL = 'https://api.nbp.pl/api/exchangerates/rates/c';
+            const URL = 'https://api.nbp.pl/api/exchangerates/rates/a';
         
             if (openingDate && closingDate) {
                 let exchangeUrl = `${URL}/${currency}/${openingDate}/${closingDate}/`;
